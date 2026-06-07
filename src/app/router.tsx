@@ -25,6 +25,21 @@ const SitesPage = lazy(() =>
 const PersonnelPage = lazy(() =>
   import('@/features/personnel/pages/PersonnelPage').then(m => ({ default: m.PersonnelPage }))
 )
+const IncidentsPage = lazy(() =>
+  import('@/features/incidents/pages/IncidentsPage').then(m => ({ default: m.IncidentsPage }))
+)
+const IncidentDetailPage = lazy(() =>
+  import('@/features/incidents/pages/IncidentDetailPage').then(m => ({ default: m.IncidentDetailPage }))
+)
+const PatrolsPage = lazy(() =>
+  import('@/features/patrols/pages/PatrolsPage').then(m => ({ default: m.PatrolsPage }))
+)
+const PatrolDetailPage = lazy(() =>
+  import('@/features/patrols/pages/PatrolDetailPage').then(m => ({ default: m.PatrolDetailPage }))
+)
+const GuardLogPage = lazy(() =>
+  import('@/features/guard-log/pages/GuardLogPage').then(m => ({ default: m.GuardLogPage }))
+)
 
 function LoadingScreen() {
   return (
@@ -103,26 +118,32 @@ export const router = createBrowserRouter([
           },
           {
             path: '/incidents',
-            element: <div className="text-zinc-400 text-sm">Módulo de incidentes — próximamente</div>,
+            element: <Suspense fallback={<LoadingScreen />}><IncidentsPage /></Suspense>,
             handle: { title: 'Incidentes' },
           },
           {
             path: '/incidents/new',
-            element: (
-              <Suspense fallback={<LoadingScreen />}>
-                <IncidentForm />
-              </Suspense>
-            ),
+            element: <Suspense fallback={<LoadingScreen />}><IncidentForm /></Suspense>,
             handle: { title: 'Nuevo Incidente' },
           },
           {
+            path: '/incidents/:id',
+            element: <Suspense fallback={<LoadingScreen />}><IncidentDetailPage /></Suspense>,
+            handle: { title: 'Detalle de Incidente' },
+          },
+          {
             path: '/patrols',
-            element: <div className="text-zinc-400 text-sm">Módulo de rondines — próximamente</div>,
+            element: <Suspense fallback={<LoadingScreen />}><PatrolsPage /></Suspense>,
             handle: { title: 'Rondines' },
           },
           {
+            path: '/patrols/:id',
+            element: <Suspense fallback={<LoadingScreen />}><PatrolDetailPage /></Suspense>,
+            handle: { title: 'Detalle de Rondín' },
+          },
+          {
             path: '/guard-log',
-            element: <div className="text-zinc-400 text-sm">Libro de guardia — próximamente</div>,
+            element: <Suspense fallback={<LoadingScreen />}><GuardLogPage /></Suspense>,
             handle: { title: 'Libro de Guardia' },
           },
           {
