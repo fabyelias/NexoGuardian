@@ -110,8 +110,12 @@ export function Sidebar({ onClose }: SidebarProps) {
           <span className="text-sm font-semibold text-white tracking-wide">NexoGuard</span>
         </div>
         {onClose && (
-          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300 transition-colors">
-            <X className="h-4 w-4" />
+          <button
+            onClick={onClose}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-zinc-400 hover:text-white hover:bg-white/8 active:bg-white/15 transition-colors"
+            aria-label="Cerrar menú"
+          >
+            <X className="h-5 w-5" />
           </button>
         )}
       </div>
@@ -125,7 +129,7 @@ export function Sidebar({ onClose }: SidebarProps) {
             onClick={onClose}
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
+                'flex items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors',
                 isActive
                   ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20'
                   : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'

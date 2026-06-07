@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import {
   Building2, Plus, Search, Pencil, Trash2,
-  MapPin, Phone, Mail, CheckCircle2, XCircle,
+  MapPin, Phone, Mail, CheckCircle2, XCircle, QrCode,
 } from 'lucide-react'
 import { useSites, useDeleteSite } from '../hooks/useSites'
 import { SiteFormDialog } from '../components/SiteFormDialog'
 import { DeleteConfirmDialog } from '../components/DeleteConfirmDialog'
+import { CheckpointsDialog } from '../components/CheckpointsDialog'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Badge } from '@/shared/components/ui/badge'
@@ -20,6 +21,7 @@ export function SitesPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [editingSite, setEditingSite] = useState<Site | null>(null)
   const [deletingSite, setDeletingSite] = useState<Site | null>(null)
+  const [checkpointsSite, setCheckpointsSite] = useState<Site | null>(null)
 
   const filtered = sites.filter((s) =>
     s.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -112,14 +114,23 @@ export function SitesPage() {
                   {/* Actions */}
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                     <button
+                      onClick={() => setCheckpointsSite(site)}
+                      className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 hover:text-blue-400 hover:bg-blue-950/30 transition-colors"
+                      title="Checkpoints / QR"
+                    >
+                      <QrCode className="h-3.5 w-3.5" />
+                    </button>
+                    <button
                       onClick={() => handleEdit(site)}
                       className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 hover:text-zinc-300 hover:bg-white/8 transition-colors"
+                      title="Editar"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
                     <button
                       onClick={() => setDeletingSite(site)}
                       className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 hover:text-red-400 hover:bg-red-950/30 transition-colors"
+                      title="Eliminar"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
@@ -155,6 +166,17 @@ export function SitesPage() {
                     {site.consignas}
                   </p>
                 )}
+
+                {/* Checkpoints CTA */}
+                <div className="border-t border-white/5 pt-3">
+                  <button
+                    onClick={() => setCheckpointsSite(site)}
+                    className="flex items-center gap-1.5 text-xs text-zinc-600 hover:text-blue-400 transition-colors"
+                  >
+                    <QrCode className="h-3 w-3" />
+                    Gestionar checkpoints y QRs
+                  </button>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -175,6 +197,13 @@ export function SitesPage() {
         description={`¿Eliminar "${deletingSite?.name}"? Se borrarán también sus puntos de control asociados.`}
         isPending={deleteSite.isPending}
       />
+      {checkpointsSite && (
+        <CheckpointsDialog
+          open={!!checkpointsSite}
+          onClose={() => setCheckpointsSite(null)}
+          site={checkpointsSite}
+        />
+      )}
     </div>
   )
 }

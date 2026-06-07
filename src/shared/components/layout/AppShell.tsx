@@ -26,14 +26,17 @@ export function AppShell() {
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setSidebarOpen(false)}
-          />
-          <div className="absolute inset-y-0 left-0">
+        <div className="fixed inset-0 z-50 lg:hidden flex">
+          {/* Sidebar panel */}
+          <div className="relative z-10 shrink-0">
             <Sidebar onClose={() => setSidebarOpen(false)} />
           </div>
+          {/* Backdrop — button so iOS Safari fires click/touch events */}
+          <button
+            className="flex-1 bg-black/70 backdrop-blur-sm cursor-pointer"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Cerrar menú"
+          />
         </div>
       )}
 
