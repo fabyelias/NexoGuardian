@@ -55,6 +55,12 @@ const SchedulingPage = lazy(() =>
 const GuardProfilePage = lazy(() =>
   import('@/features/personnel/pages/GuardProfilePage').then(m => ({ default: m.GuardProfilePage }))
 )
+const NewPatrolPage = lazy(() =>
+  import('@/features/patrols/pages/NewPatrolPage').then(m => ({ default: m.NewPatrolPage }))
+)
+const PatrolScanPage = lazy(() =>
+  import('@/features/patrols/pages/PatrolScanPage').then(m => ({ default: m.PatrolScanPage }))
+)
 
 function LoadingScreen() {
   return (
@@ -146,6 +152,16 @@ export const router = createBrowserRouter([
             path: '/patrols',
             element: <Suspense fallback={<LoadingScreen />}><PatrolsPage /></Suspense>,
             handle: { title: 'Rondines' },
+          },
+          {
+            path: '/patrols/new',
+            element: <Suspense fallback={<LoadingScreen />}><NewPatrolPage /></Suspense>,
+            handle: { title: 'Nuevo Rondín' },
+          },
+          {
+            path: '/patrols/scan/:sessionId',
+            element: <Suspense fallback={<LoadingScreen />}><PatrolScanPage /></Suspense>,
+            handle: { title: 'Rondín en Curso' },
           },
           {
             path: '/patrols/:id',
