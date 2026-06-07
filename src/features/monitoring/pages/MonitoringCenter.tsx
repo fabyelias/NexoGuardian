@@ -23,8 +23,9 @@ export function MonitoringCenter() {
   useEffect(() => {
     if (!profile?.organization_id) return
     loadData()
-    setupRealtime()
-  }, [profile?.organization_id])
+    const cleanup = setupRealtime()
+    return cleanup
+  }, [profile?.organization_id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function loadData() {
     const orgId = profile!.organization_id
@@ -73,8 +74,11 @@ export function MonitoringCenter() {
   }
 
   function setupRealtime() {
+    const channelName = `monitoring-${profile!.organization_id}`
+    supabase.removeChannel(supabase.channel(channelName))
+
     const channel = supabase
-      .channel('monitoring')
+      .channel(channelName)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
@@ -88,7 +92,7 @@ export function MonitoringCenter() {
       }, () => loadData())
       .subscribe()
 
-    return () => supabase.removeChannel(channel)
+    return () => { supabase.removeChannel(channel) }
   }
 
   const onlineGuards = guards.filter(g => g.isOnline)

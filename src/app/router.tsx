@@ -22,6 +22,9 @@ const IncidentForm = lazy(() =>
 const SitesPage = lazy(() =>
   import('@/features/sites/pages/SitesPage').then(m => ({ default: m.SitesPage }))
 )
+const PersonnelPage = lazy(() =>
+  import('@/features/personnel/pages/PersonnelPage').then(m => ({ default: m.PersonnelPage }))
+)
 
 function LoadingScreen() {
   return (
@@ -133,7 +136,11 @@ export const router = createBrowserRouter([
           },
           {
             path: '/personnel',
-            element: <div className="text-zinc-400 text-sm">Gestión de personal — próximamente</div>,
+            element: (
+              <Suspense fallback={<LoadingScreen />}>
+                <PersonnelPage />
+              </Suspense>
+            ),
             handle: { title: 'Personal' },
           },
           {
