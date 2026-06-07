@@ -27,30 +27,29 @@ export function usePersonnel(role?: UserRole) {
   })
 }
 
+export interface CreatePersonnelInput {
+  email: string
+  password: string
+  first_name: string
+  last_name: string
+  role: UserRole
+  phone?: string
+  badge_number?: string
+  id_document?: string
+  address?: string
+}
+
 export function useCreatePersonnel() {
   const queryClient = useQueryClient()
-  const { profile } = useAuthStore()
 
   return useMutation({
-    mutationFn: async (values: {
-      email: string
-      password: string
-      first_name: string
-      last_name: string
-      role: UserRole
-      phone?: string
-      badge_number?: string
-      id_document?: string
-      address?: string
-    }) => {
-      const { email, password, ...profileData } = values
-
-      const { data: authData, error: authError } = await supabase.auth.admin
-        ? supabase.functions.invoke('create-user', { body: { email, password, ...profileData, organization_id: profile!.organization_id } })
-        : { data: null, error: new Error('Use Supabase dashboard') }
-
-      if (authError) throw authError
-      return authData
+    mutationFn: async (values: CreatePersonnelInput) => {
+      const { data, error } = await supabase.functions.invoke('create-user', {
+        body: values,
+      })
+      if (error) throw new Error(error.message)
+      if (data?.error) throw new Error(data.error)
+      return data
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['personnel'] }),
   })
@@ -79,10 +78,7 @@ export function useTogglePersonnelStatus() {
 
   return useMutation({
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ is_active })
-        .eq('id', id)
+      const { error } = await supabase.from('profiles').update({ is_active }).eq('id', id)
       if (error) throw error
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['personnel'] }),

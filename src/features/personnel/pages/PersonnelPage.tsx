@@ -2,7 +2,7 @@ import { useState } from 'react'
 import {
   Users, Search, Pencil, Shield, UserCog,
   UserCheck, Building2, Phone, Hash,
-  ToggleLeft, ToggleRight, ExternalLink,
+  ToggleLeft, ToggleRight, Plus,
 } from 'lucide-react'
 import { usePersonnel, useTogglePersonnelStatus } from '../hooks/usePersonnel'
 import { PersonnelFormDialog } from '../components/PersonnelFormDialog'
@@ -37,6 +37,7 @@ export function PersonnelPage() {
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all')
   const [editingPerson, setEditingPerson] = useState<Profile | null>(null)
+  const [creating, setCreating] = useState(false)
 
   const filtered = personnel.filter((p) => {
     const matchesRole = roleFilter === 'all' || p.role === roleFilter
@@ -57,12 +58,9 @@ export function PersonnelPage() {
             {personnel.length} integrante{personnel.length !== 1 ? 's' : ''} registrado{personnel.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => window.open('https://supabase.com/dashboard/project/wsalbkayutliabpdymmi/auth/users', '_blank')}
-        >
-          <ExternalLink className="h-4 w-4" />
-          Crear usuario en Supabase
+        <Button onClick={() => setCreating(true)}>
+          <Plus className="h-4 w-4" />
+          Nuevo integrante
         </Button>
       </div>
 
@@ -212,8 +210,8 @@ export function PersonnelPage() {
       )}
 
       <PersonnelFormDialog
-        open={!!editingPerson}
-        onClose={() => setEditingPerson(null)}
+        open={creating || !!editingPerson}
+        onClose={() => { setCreating(false); setEditingPerson(null) }}
         person={editingPerson}
       />
     </div>
