@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, User, Phone, Hash, FileText,
-  Clock, MapPin, Shield, BookOpen, Route, Building2,
+  Clock, MapPin, Shield, BookOpen, Route, Building2, Camera, Loader2,
 } from 'lucide-react'
 import { supabase } from '@/shared/lib/supabase'
 import { useAuthStore } from '@/shared/stores/authStore'
@@ -35,6 +35,43 @@ export function GuardProfilePage() {
   const [guard, setGuard] = useState<Profile | null>(null)
   const [stats, setStats] = useState<MonthStats>({ shiftsWorked: 0, sitesVisited: 0, logsWritten: 0, patrols: 0 })
   const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !guard) return
+    if (file.size > 5 * 1024 * 1024) { setUploadError('La imagen no puede superar 5 MB'); return }
+
+    setUploading(true)
+    setUploadError(null)
+    try {
+      const ext = file.name.split('.').pop() ?? 'jpg'
+      const path = `${guard.id}/avatar.${ext}`
+
+      const { error: upErr } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true, contentType: file.type })
+      if (upErr) throw upErr
+
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+      const urlWithBust = `${publicUrl}?t=${Date.now()}`
+
+      const { error: dbErr } = await supabase
+        .from('profiles')
+        .update({ avatar_url: urlWithBust })
+        .eq('id', guard.id)
+      if (dbErr) throw dbErr
+
+      setGuard(prev => prev ? { ...prev, avatar_url: urlWithBust } : prev)
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Error al subir la imagen')
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
 
   const { data: monthShifts = [] } = useGuardMonthShifts(id ?? '')
 
@@ -116,11 +153,35 @@ export function GuardProfilePage() {
       {/* Profile card */}
       <div className="rounded-xl border border-white/8 bg-zinc-900/60 p-6">
         <div className="flex items-start gap-5">
-          <Avatar className="h-16 w-16">
-            <AvatarImage src={guard.avatar_url ?? undefined} />
-            <AvatarFallback className="text-lg">{getInitials(guard.first_name, guard.last_name)}</AvatarFallback>
-          </Avatar>
+          {/* Avatar with upload overlay */}
+          <div className="relative shrink-0 group/avatar">
+            <Avatar className="h-20 w-20">
+              <AvatarImage src={guard.avatar_url ?? undefined} />
+              <AvatarFallback className="text-xl">{getInitials(guard.first_name, guard.last_name)}</AvatarFallback>
+            </Avatar>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="absolute inset-0 rounded-full flex items-center justify-center bg-black/60 opacity-0 group-hover/avatar:opacity-100 transition-opacity"
+              title="Cambiar foto"
+            >
+              {uploading
+                ? <Loader2 className="h-5 w-5 text-white animate-spin" />
+                : <Camera className="h-5 w-5 text-white" />
+              }
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleAvatarUpload}
+            />
+          </div>
           <div className="flex-1 min-w-0">
+            {uploadError && (
+              <p className="text-xs text-red-400 mb-2">{uploadError}</p>
+            )}
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-xl font-semibold text-white">
