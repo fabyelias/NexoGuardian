@@ -40,6 +40,9 @@ const PatrolDetailPage = lazy(() =>
 const GuardLogPage = lazy(() =>
   import('@/features/guard-log/pages/GuardLogPage').then(m => ({ default: m.GuardLogPage }))
 )
+const ReportsPage = lazy(() =>
+  import('@/features/reports/pages/ReportsPage').then(m => ({ default: m.ReportsPage }))
+)
 
 function LoadingScreen() {
   return (
@@ -166,7 +169,7 @@ export const router = createBrowserRouter([
           },
           {
             path: '/reports',
-            element: <div className="text-zinc-400 text-sm">Informes y exportación — próximamente</div>,
+            element: <Suspense fallback={<LoadingScreen />}><ReportsPage /></Suspense>,
             handle: { title: 'Informes' },
           },
         ],
