@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Users, Search, Pencil, Shield, UserCog,
   UserCheck, Building2, Phone, Hash,
-  ToggleLeft, ToggleRight, Plus,
+  ToggleLeft, ToggleRight, Plus, ExternalLink,
 } from 'lucide-react'
 import { usePersonnel, useTogglePersonnelStatus } from '../hooks/usePersonnel'
 import { PersonnelFormDialog } from '../components/PersonnelFormDialog'
@@ -33,6 +34,7 @@ const ROLE_FILTERS: { value: UserRole | 'all'; label: string }[] = [
 export function PersonnelPage() {
   const { data: personnel = [], isLoading } = usePersonnel()
   const toggleStatus = useTogglePersonnelStatus()
+  const navigate = useNavigate()
 
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all')
@@ -194,12 +196,24 @@ export function PersonnelPage() {
                       </button>
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        onClick={() => setEditingPerson(person)}
-                        className="opacity-0 group-hover:opacity-100 flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 hover:text-zinc-300 hover:bg-white/8 transition-all"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
+                      <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-all">
+                        {(person.role === 'guard' || person.role === 'supervisor') && (
+                          <button
+                            onClick={() => navigate(`/personnel/${person.id}`)}
+                            className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 hover:text-zinc-300 hover:bg-white/8"
+                            title="Ver perfil completo"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => setEditingPerson(person)}
+                          className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 hover:text-zinc-300 hover:bg-white/8"
+                          title="Editar"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )

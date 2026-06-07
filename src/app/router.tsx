@@ -43,6 +43,12 @@ const GuardLogPage = lazy(() =>
 const ReportsPage = lazy(() =>
   import('@/features/reports/pages/ReportsPage').then(m => ({ default: m.ReportsPage }))
 )
+const SchedulingPage = lazy(() =>
+  import('@/features/scheduling/pages/SchedulingPage').then(m => ({ default: m.SchedulingPage }))
+)
+const GuardProfilePage = lazy(() =>
+  import('@/features/personnel/pages/GuardProfilePage').then(m => ({ default: m.GuardProfilePage }))
+)
 
 function LoadingScreen() {
   return (
@@ -166,6 +172,28 @@ export const router = createBrowserRouter([
               </Suspense>
             ),
             handle: { title: 'Personal' },
+          },
+          {
+            path: '/personnel/:id',
+            element: (
+              <AuthGuard allowedRoles={['super_admin', 'admin', 'supervisor']}>
+                <Suspense fallback={<LoadingScreen />}>
+                  <GuardProfilePage />
+                </Suspense>
+              </AuthGuard>
+            ),
+            handle: { title: 'Perfil del Vigilador' },
+          },
+          {
+            path: '/scheduling',
+            element: (
+              <AuthGuard allowedRoles={['super_admin', 'admin', 'supervisor']}>
+                <Suspense fallback={<LoadingScreen />}>
+                  <SchedulingPage />
+                </Suspense>
+              </AuthGuard>
+            ),
+            handle: { title: 'Planificación' },
           },
           {
             path: '/reports',

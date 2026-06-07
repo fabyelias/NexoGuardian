@@ -11,7 +11,7 @@ import {
   BookOpen,
   LogOut,
   Bell,
-  ChevronRight,
+  CalendarDays,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { useAuthStore } from '@/shared/stores/authStore'
@@ -39,6 +39,12 @@ const NAV_ITEMS: NavItem[] = [
     to: '/monitoring',
     icon: <Radio className="h-4 w-4" />,
     label: 'Centro de Monitoreo',
+    roles: ['super_admin', 'admin', 'supervisor'],
+  },
+  {
+    to: '/scheduling',
+    icon: <CalendarDays className="h-4 w-4" />,
+    label: 'Planificación',
     roles: ['super_admin', 'admin', 'supervisor'],
   },
   {
