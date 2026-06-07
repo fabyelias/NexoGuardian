@@ -47,8 +47,9 @@ export function useCreatePersonnel() {
       const { data, error } = await supabase.functions.invoke('create-user', {
         body: values,
       })
-      if (error) throw new Error(error.message)
+      // Check the actual body error first (more descriptive than the SDK wrapper)
       if (data?.error) throw new Error(data.error)
+      if (error) throw new Error(error.message)
       return data
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['personnel'] }),
