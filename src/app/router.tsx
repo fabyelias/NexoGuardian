@@ -13,6 +13,12 @@ const DashboardAdmin = lazy(() =>
 const DashboardGuard = lazy(() =>
   import('@/features/dashboard/guard/DashboardGuard').then(m => ({ default: m.DashboardGuard }))
 )
+const DashboardSupervisor = lazy(() =>
+  import('@/features/dashboard/supervisor/DashboardSupervisor').then(m => ({ default: m.DashboardSupervisor }))
+)
+const DashboardClient = lazy(() =>
+  import('@/features/dashboard/client/DashboardClient').then(m => ({ default: m.DashboardClient }))
+)
 const MonitoringCenter = lazy(() =>
   import('@/features/monitoring/pages/MonitoringCenter').then(m => ({ default: m.MonitoringCenter }))
 )
@@ -80,17 +86,13 @@ function SmartDashboard() {
 
   switch (profile.role) {
     case 'guard':
-      return (
-        <Suspense fallback={<LoadingScreen />}>
-          <DashboardGuard />
-        </Suspense>
-      )
+      return <Suspense fallback={<LoadingScreen />}><DashboardGuard /></Suspense>
+    case 'supervisor':
+      return <Suspense fallback={<LoadingScreen />}><DashboardSupervisor /></Suspense>
+    case 'client':
+      return <Suspense fallback={<LoadingScreen />}><DashboardClient /></Suspense>
     default:
-      return (
-        <Suspense fallback={<LoadingScreen />}>
-          <DashboardAdmin />
-        </Suspense>
-      )
+      return <Suspense fallback={<LoadingScreen />}><DashboardAdmin /></Suspense>
   }
 }
 
