@@ -31,14 +31,20 @@ export function useAuth() {
 
   async function fetchProfile(userId: string) {
     setLoading(true)
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle()
 
-    setProfile(data as Profile | null)
-    setLoading(false)
+      if (error) console.error('Profile fetch error:', error)
+      setProfile((data as Profile) ?? null)
+    } catch (err) {
+      console.error('Unexpected error fetching profile:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return { user, session, profile, isLoading }

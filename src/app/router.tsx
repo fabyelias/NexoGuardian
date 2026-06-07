@@ -19,6 +19,9 @@ const MonitoringCenter = lazy(() =>
 const IncidentForm = lazy(() =>
   import('@/features/incidents/components/IncidentForm').then(m => ({ default: m.IncidentForm }))
 )
+const SitesPage = lazy(() =>
+  import('@/features/sites/pages/SitesPage').then(m => ({ default: m.SitesPage }))
+)
 
 function LoadingScreen() {
   return (
@@ -121,7 +124,11 @@ export const router = createBrowserRouter([
           },
           {
             path: '/sites',
-            element: <div className="text-zinc-400 text-sm">Gestión de objetivos — próximamente</div>,
+            element: (
+              <Suspense fallback={<LoadingScreen />}>
+                <SitesPage />
+              </Suspense>
+            ),
             handle: { title: 'Objetivos Protegidos' },
           },
           {
