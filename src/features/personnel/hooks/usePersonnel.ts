@@ -73,6 +73,22 @@ export function useUpdatePersonnel() {
   })
 }
 
+export function useDeletePersonnel() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      const { data, error } = await supabase.functions.invoke('delete-user', {
+        body: { userId },
+      })
+      if (error) throw new Error(error.message)
+      if (data?.error) throw new Error(data.error)
+      return data
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['personnel'] }),
+  })
+}
+
 export function useTogglePersonnelStatus() {
   const queryClient = useQueryClient()
 

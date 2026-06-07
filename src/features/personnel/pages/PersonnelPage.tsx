@@ -114,8 +114,8 @@ export function PersonnelPage() {
           )}
         </div>
       ) : (
-        <div className="rounded-xl border border-white/8 overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="rounded-xl border border-white/8 overflow-x-auto">
+          <table className="w-full text-sm min-w-[600px]">
             <thead>
               <tr className="border-b border-white/8 bg-white/2">
                 <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500">Integrante</th>

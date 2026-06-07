@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Loader2, Eye, EyeOff } from 'lucide-react'
+import { Loader2, Eye, EyeOff, Trash2 } from 'lucide-react'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/shared/components/ui/dialog'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
-import { useCreatePersonnel, useUpdatePersonnel } from '../hooks/usePersonnel'
+import { useCreatePersonnel, useUpdatePersonnel, useDeletePersonnel } from '../hooks/usePersonnel'
 import type { Profile } from '@/shared/types/models'
 import type { UserRole } from '@/shared/types/enums'
 
@@ -26,9 +26,11 @@ const ROLES: { value: UserRole; label: string; description: string }[] = [
 export function PersonnelFormDialog({ open, onClose, person }: PersonnelFormDialogProps) {
   const create = useCreatePersonnel()
   const update = useUpdatePersonnel()
+  const deletePerson = useDeletePersonnel()
   const isEditing = !!person
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const [form, setForm] = useState({
     email: '',
@@ -44,6 +46,7 @@ export function PersonnelFormDialog({ open, onClose, person }: PersonnelFormDial
 
   useEffect(() => {
     setError(null)
+    setConfirmDelete(false)
     if (person) {
       setForm({
         email: '',
@@ -89,7 +92,19 @@ export function PersonnelFormDialog({ open, onClose, person }: PersonnelFormDial
     }
   }
 
-  const isPending = create.isPending || update.isPending
+  async function handleDelete() {
+    if (!confirmDelete) { setConfirmDelete(true); return }
+    setError(null)
+    try {
+      await deletePerson.mutateAsync(person!.id)
+      onClose()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al eliminar')
+      setConfirmDelete(false)
+    }
+  }
+
+  const isPending = create.isPending || update.isPending || deletePerson.isPending
 
   return (
     <Dialog open={open} onOpenChange={o => !o && onClose()}>
@@ -199,12 +214,32 @@ export function PersonnelFormDialog({ open, onClose, person }: PersonnelFormDial
             )}
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              {isEditing ? 'Guardar cambios' : 'Crear integrante'}
-            </Button>
+          <DialogFooter className="flex items-center justify-between">
+            <div>
+              {isEditing && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDelete}
+                  disabled={isPending}
+                  className={confirmDelete ? 'text-red-400 hover:text-red-300' : 'text-zinc-500 hover:text-red-400'}
+                >
+                  {deletePerson.isPending
+                    ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    : <Trash2 className="h-3.5 w-3.5" />
+                  }
+                  {confirmDelete ? '¿Confirmar eliminación?' : 'Eliminar integrante'}
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+              <Button type="submit" disabled={isPending}>
+                {(create.isPending || update.isPending) && <Loader2 className="h-4 w-4 animate-spin" />}
+                {isEditing ? 'Guardar cambios' : 'Crear integrante'}
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>

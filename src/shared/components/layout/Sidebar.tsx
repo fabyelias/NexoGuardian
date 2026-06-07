@@ -12,6 +12,7 @@ import {
   LogOut,
   Bell,
   CalendarDays,
+  X,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { useAuthStore } from '@/shared/stores/authStore'
@@ -19,6 +20,10 @@ import { useSignOut } from '@/features/auth/hooks/useAuth'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar'
 import { getInitials } from '@/shared/lib/utils'
 import type { UserRole } from '@/shared/types/enums'
+
+interface SidebarProps {
+  onClose?: () => void
+}
 
 interface NavItem {
   to: string
@@ -85,7 +90,7 @@ const NAV_ITEMS: NavItem[] = [
   },
 ]
 
-export function Sidebar() {
+export function Sidebar({ onClose }: SidebarProps) {
   const { profile } = useAuthStore()
   const signOut = useSignOut()
   const location = useLocation()
@@ -95,13 +100,20 @@ export function Sidebar() {
   const visibleItems = NAV_ITEMS.filter((item) => item.roles.includes(profile.role))
 
   return (
-    <aside className="flex h-screen w-60 flex-col border-r border-white/8 bg-[#0a0a0a]">
+    <aside className="flex h-screen w-64 flex-col border-r border-white/8 bg-[#0a0a0a]">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 py-4 border-b border-white/8">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600/10 border border-blue-500/20">
-          <Shield className="h-4 w-4 text-blue-400" />
+      <div className="flex items-center justify-between px-5 py-4 border-b border-white/8">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600/10 border border-blue-500/20">
+            <Shield className="h-4 w-4 text-blue-400" />
+          </div>
+          <span className="text-sm font-semibold text-white tracking-wide">NexoGuard</span>
         </div>
-        <span className="text-sm font-semibold text-white tracking-wide">NexoGuard</span>
+        {onClose && (
+          <button onClick={onClose} className="text-zinc-500 hover:text-zinc-300 transition-colors">
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
@@ -110,6 +122,7 @@ export function Sidebar() {
           <NavLink
             key={item.to}
             to={item.to}
+            onClick={onClose}
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
