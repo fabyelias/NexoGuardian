@@ -1,0 +1,145 @@
+import { lazy, Suspense, type ReactNode } from 'react'
+import React from 'react'
+import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
+import { AppShell } from '@/shared/components/layout/AppShell'
+import { LoginPage } from '@/features/auth/pages/LoginPage'
+import { useAuthStore } from '@/shared/stores/authStore'
+import { Loader2 } from 'lucide-react'
+import type { UserRole } from '@/shared/types/enums'
+
+const DashboardAdmin = lazy(() =>
+  import('@/features/dashboard/admin/DashboardAdmin').then(m => ({ default: m.DashboardAdmin }))
+)
+const DashboardGuard = lazy(() =>
+  import('@/features/dashboard/guard/DashboardGuard').then(m => ({ default: m.DashboardGuard }))
+)
+const MonitoringCenter = lazy(() =>
+  import('@/features/monitoring/pages/MonitoringCenter').then(m => ({ default: m.MonitoringCenter }))
+)
+const IncidentForm = lazy(() =>
+  import('@/features/incidents/components/IncidentForm').then(m => ({ default: m.IncidentForm }))
+)
+
+function LoadingScreen() {
+  return (
+    <div className="flex h-screen items-center justify-center bg-[#0a0a0a]">
+      <div className="flex flex-col items-center gap-3">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <p className="text-sm text-zinc-500">Cargando NexoGuard...</p>
+      </div>
+    </div>
+  )
+}
+
+function AuthGuard({ allowedRoles, children }: { allowedRoles?: UserRole[]; children?: React.ReactNode }) {
+  const { user, profile, isLoading } = useAuthStore()
+
+  if (isLoading) return <LoadingScreen />
+  if (!user) return <Navigate to="/login" replace />
+  if (allowedRoles && profile && !allowedRoles.includes(profile.role)) {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  return children ? <>{children}</> : <Outlet />
+}
+
+function SmartDashboard() {
+  const { profile } = useAuthStore()
+
+  if (!profile) return <LoadingScreen />
+
+  switch (profile.role) {
+    case 'guard':
+      return (
+        <Suspense fallback={<LoadingScreen />}>
+          <DashboardGuard />
+        </Suspense>
+      )
+    default:
+      return (
+        <Suspense fallback={<LoadingScreen />}>
+          <DashboardAdmin />
+        </Suspense>
+      )
+  }
+}
+
+export const router = createBrowserRouter([
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    element: <AuthGuard />,
+    children: [
+      {
+        element: <AppShell />,
+        children: [
+          {
+            path: '/',
+            element: <Navigate to="/dashboard" replace />,
+          },
+          {
+            path: '/dashboard',
+            element: <SmartDashboard />,
+            handle: { title: 'Dashboard' },
+          },
+          {
+            path: '/monitoring',
+            element: (
+              <AuthGuard allowedRoles={['super_admin', 'admin', 'supervisor']}>
+                <Suspense fallback={<LoadingScreen />}>
+                  <MonitoringCenter />
+                </Suspense>
+              </AuthGuard>
+            ),
+            handle: { title: 'Centro de Monitoreo' },
+          },
+          {
+            path: '/incidents',
+            element: <div className="text-zinc-400 text-sm">Módulo de incidentes — próximamente</div>,
+            handle: { title: 'Incidentes' },
+          },
+          {
+            path: '/incidents/new',
+            element: (
+              <Suspense fallback={<LoadingScreen />}>
+                <IncidentForm />
+              </Suspense>
+            ),
+            handle: { title: 'Nuevo Incidente' },
+          },
+          {
+            path: '/patrols',
+            element: <div className="text-zinc-400 text-sm">Módulo de rondines — próximamente</div>,
+            handle: { title: 'Rondines' },
+          },
+          {
+            path: '/guard-log',
+            element: <div className="text-zinc-400 text-sm">Libro de guardia — próximamente</div>,
+            handle: { title: 'Libro de Guardia' },
+          },
+          {
+            path: '/sites',
+            element: <div className="text-zinc-400 text-sm">Gestión de objetivos — próximamente</div>,
+            handle: { title: 'Objetivos Protegidos' },
+          },
+          {
+            path: '/personnel',
+            element: <div className="text-zinc-400 text-sm">Gestión de personal — próximamente</div>,
+            handle: { title: 'Personal' },
+          },
+          {
+            path: '/reports',
+            element: <div className="text-zinc-400 text-sm">Informes y exportación — próximamente</div>,
+            handle: { title: 'Informes' },
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: '*',
+    element: <Navigate to="/dashboard" replace />,
+  },
+])
