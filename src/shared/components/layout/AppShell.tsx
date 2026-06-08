@@ -5,6 +5,7 @@ import { TopBar } from './TopBar'
 import { PanicAlertBanner } from '@/shared/components/PanicAlertBanner'
 import { useOnline } from '@/shared/hooks/useOnline'
 import { usePanicListener } from '@/shared/hooks/usePanicListener'
+import { useEscalationChecker } from '@/shared/hooks/useEscalationChecker'
 import { useGuardLocationBroadcast } from '@/shared/hooks/useGuardLocationBroadcast'
 import { WifiOff } from 'lucide-react'
 
@@ -17,8 +18,10 @@ export function AppShell() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  // Real-time panic listener for admin/supervisor roles
+  // Poll notifications for new panic alerts (admin/supervisor)
   usePanicListener()
+  // Escalation: alert admin if supervisor ignores panic for 5+ min
+  useEscalationChecker()
   // Continuous GPS broadcast for guards during their shift
   useGuardLocationBroadcast()
 
