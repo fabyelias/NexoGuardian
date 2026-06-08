@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import { Outlet, useLocation, useMatches } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
+import { PanicAlertBanner } from '@/shared/components/PanicAlertBanner'
 import { useOnline } from '@/shared/hooks/useOnline'
+import { usePanicListener } from '@/shared/hooks/usePanicListener'
 import { WifiOff } from 'lucide-react'
 
 export function AppShell() {
@@ -13,6 +15,9 @@ export function AppShell() {
   const title = (currentMatch?.handle as { title?: string })?.title ?? 'NexoGuard'
 
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Real-time panic listener for admin/supervisor roles
+  usePanicListener()
 
   // Close drawer on route change
   useEffect(() => { setSidebarOpen(false) }, [location.pathname])
@@ -42,6 +47,10 @@ export function AppShell() {
 
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         <TopBar title={title} onMenuClick={() => setSidebarOpen(true)} />
+
+        {/* Panic alert banner — always on top, below topbar */}
+        <PanicAlertBanner />
+
         {!isOnline && (
           <div className="flex items-center gap-2 bg-amber-950/80 border-b border-amber-800/30 px-4 py-2 text-xs text-amber-400">
             <WifiOff className="h-3.5 w-3.5 shrink-0" />

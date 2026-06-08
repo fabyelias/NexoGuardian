@@ -7,6 +7,8 @@ export interface Alert {
   message: string
   incidentId?: string
   guardId?: string
+  lat?: number | null
+  lng?: number | null
   timestamp: string
   isAcknowledged: boolean
 }
