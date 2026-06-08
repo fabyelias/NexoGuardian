@@ -5,6 +5,7 @@ import { TopBar } from './TopBar'
 import { PanicAlertBanner } from '@/shared/components/PanicAlertBanner'
 import { useOnline } from '@/shared/hooks/useOnline'
 import { usePanicListener } from '@/shared/hooks/usePanicListener'
+import { useGuardLocationBroadcast } from '@/shared/hooks/useGuardLocationBroadcast'
 import { WifiOff } from 'lucide-react'
 
 export function AppShell() {
@@ -18,6 +19,8 @@ export function AppShell() {
 
   // Real-time panic listener for admin/supervisor roles
   usePanicListener()
+  // Continuous GPS broadcast for guards during their shift
+  useGuardLocationBroadcast()
 
   // Close drawer on route change
   useEffect(() => { setSidebarOpen(false) }, [location.pathname])
