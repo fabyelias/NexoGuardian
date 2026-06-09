@@ -103,12 +103,27 @@ export function LiveGuardMap({ pins, center, height = '320px' }: LiveGuardMapPro
 
     return () => {
       destroyedRef.current = true
-      // Remove all markers first to avoid Leaflet holding references
+
+      // Remove markers
       markersRef.current.forEach((m) => { try { m.remove() } catch { /* ignore */ } })
       markersRef.current.clear()
+
       if (mapRef.current) {
-        try { mapRef.current.remove() } catch { /* ignore */ }
+        try {
+          // Remove all layers (cancels pending tile loads)
+          mapRef.current.eachLayer((l) => { try { l.remove() } catch { /* ignore */ } })
+          // Strip all Leaflet event listeners
+          mapRef.current.off()
+          // Destroy the map instance
+          mapRef.current.remove()
+        } catch { /* ignore */ }
         mapRef.current = null
+      }
+
+      // Empty the container so any in-flight tile callbacks have
+      // nowhere to insert nodes (avoids insertBefore NotFoundError)
+      if (containerRef.current) {
+        try { containerRef.current.innerHTML = '' } catch { /* ignore */ }
       }
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps

@@ -3,6 +3,7 @@ import React from 'react'
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom'
 import { AppShell } from '@/shared/components/layout/AppShell'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
+import { RouteErrorPage } from '@/shared/components/RouteErrorPage'
 import { useAuthStore } from '@/shared/stores/authStore'
 import { Loader2 } from 'lucide-react'
 import type { UserRole } from '@/shared/types/enums'
@@ -106,12 +107,15 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+    errorElement: <RouteErrorPage />,
   },
   {
     element: <AuthGuard />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         element: <AppShell />,
+        errorElement: <RouteErrorPage />,
         children: [
           {
             path: '/',
