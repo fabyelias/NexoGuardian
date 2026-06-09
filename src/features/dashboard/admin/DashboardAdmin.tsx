@@ -8,6 +8,7 @@ import {
 import { supabase } from '@/shared/lib/supabase'
 import { useAuthStore } from '@/shared/stores/authStore'
 import { LiveGuardMap } from '@/features/monitoring/components/LiveGuardMap'
+import { ErrorBoundary } from '@/shared/components/ErrorBoundary'
 import { formatRelativeTime } from '@/shared/lib/utils'
 import { INCIDENT_SEVERITY_LABELS } from '@/shared/types/enums'
 import type { Incident, Profile, GuardLocation, PatrolSession, Site } from '@/shared/types/models'
@@ -249,7 +250,9 @@ export function DashboardAdmin() {
               <p className="text-xs text-zinc-800 mt-1">Los vigiladores deben tener turno activo</p>
             </div>
           ) : (
-            <LiveGuardMap pins={mapPins} height="300px" />
+            <ErrorBoundary>
+              <LiveGuardMap pins={mapPins} height="300px" />
+            </ErrorBoundary>
           )}
         </div>
 

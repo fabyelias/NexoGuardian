@@ -10,6 +10,7 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/shared/components/ui/avatar'
 import { formatRelativeTime, getInitials } from '@/shared/lib/utils'
 import { LiveGuardMap } from '../components/LiveGuardMap'
+import { ErrorBoundary } from '@/shared/components/ErrorBoundary'
 import type { Incident, Profile, GuardLocation } from '@/shared/types/models'
 import { INCIDENT_SEVERITY_LABELS, INCIDENT_CATEGORY_LABELS } from '@/shared/types/enums'
 
@@ -313,7 +314,9 @@ export function MonitoringCenter() {
               <p className="text-xs text-zinc-700 mt-1">La ubicación se actualiza automáticamente durante el turno</p>
             </div>
           ) : (
-            <LiveGuardMap pins={mapPins} height="340px" />
+            <ErrorBoundary>
+              <LiveGuardMap pins={mapPins} height="340px" />
+            </ErrorBoundary>
           )}
         </CardContent>
       </Card>
