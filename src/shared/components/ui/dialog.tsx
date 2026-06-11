@@ -26,7 +26,7 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+>(({ className, children, onCloseAutoFocus, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
@@ -35,6 +35,15 @@ const DialogContent = React.forwardRef<
         'fixed left-[50%] top-[50%] z-50 w-full max-w-lg translate-x-[-50%] translate-y-[-50%] rounded-xl border border-white/10 bg-zinc-950 shadow-xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
         className
       )}
+      onCloseAutoFocus={(e) => {
+        // Radix sometimes leaves pointer-events:none on the body when a
+        // re-render interrupts the exit animation. Hard-remove it here.
+        document.body.removeAttribute('data-scroll-locked')
+        document.body.style.removeProperty('pointer-events')
+        document.body.style.removeProperty('overflow')
+        document.body.style.removeProperty('padding-right')
+        onCloseAutoFocus?.(e)
+      }}
       {...props}
     >
       {children}

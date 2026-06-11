@@ -23,6 +23,15 @@ const ROLES: { value: UserRole; label: string; description: string }[] = [
   { value: 'client', label: 'Cliente', description: 'Solo visualiza sus reportes' },
 ]
 
+function cleanupBodyLock() {
+  // Radix UI sometimes leaves pointer-events:none / scroll-lock on the body
+  // if a re-render interrupts the dialog exit animation. Force-clean it.
+  document.body.removeAttribute('data-scroll-locked')
+  document.body.style.removeProperty('pointer-events')
+  document.body.style.removeProperty('overflow')
+  document.body.style.removeProperty('padding-right')
+}
+
 export function PersonnelFormDialog({ open, onClose, person }: PersonnelFormDialogProps) {
   const create = useCreatePersonnel()
   const update = useUpdatePersonnel()
@@ -68,6 +77,15 @@ export function PersonnelFormDialog({ open, onClose, person }: PersonnelFormDial
     setForm(prev => ({ ...prev, [field]: value }))
   }
 
+  function safeClose() {
+    create.reset()
+    update.reset()
+    deletePerson.reset()
+    onClose()
+    // Give Radix the 200 ms animation budget, then hard-clean any leftover body lock
+    setTimeout(cleanupBodyLock, 250)
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
@@ -86,7 +104,7 @@ export function PersonnelFormDialog({ open, onClose, person }: PersonnelFormDial
       } else {
         await create.mutateAsync(form)
       }
-      onClose()
+      safeClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al guardar')
     }
@@ -97,7 +115,7 @@ export function PersonnelFormDialog({ open, onClose, person }: PersonnelFormDial
     setError(null)
     try {
       await deletePerson.mutateAsync(person!.id)
-      onClose()
+      safeClose()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al eliminar')
       setConfirmDelete(false)
@@ -107,7 +125,7 @@ export function PersonnelFormDialog({ open, onClose, person }: PersonnelFormDial
   const isPending = create.isPending || update.isPending || deletePerson.isPending
 
   return (
-    <Dialog open={open} onOpenChange={o => !o && onClose()}>
+    <Dialog open={open} onOpenChange={o => !o && safeClose()}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEditing ? 'Editar Integrante' : 'Nuevo Integrante'}</DialogTitle>
@@ -234,7 +252,7 @@ export function PersonnelFormDialog({ open, onClose, person }: PersonnelFormDial
               )}
             </div>
             <div className="flex gap-2">
-              <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+              <Button type="button" variant="outline" onClick={safeClose}>Cancelar</Button>
               <Button type="submit" disabled={isPending}>
                 {(create.isPending || update.isPending) && <Loader2 className="h-4 w-4 animate-spin" />}
                 {isEditing ? 'Guardar cambios' : 'Crear integrante'}
