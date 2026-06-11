@@ -36,12 +36,12 @@ export function useCreateGuardLog() {
     mutationFn: async ({
       shiftId, siteId, content, aiEnhanced, lat, lng,
     }: {
-      shiftId: string; siteId: string; content: string; aiEnhanced?: string; lat?: number; lng?: number
+      shiftId?: string | null; siteId: string; content: string; aiEnhanced?: string; lat?: number; lng?: number
     }) => {
       const { data, error } = await supabase.from('guard_logs').insert({
         organization_id: profile!.organization_id,
         guard_id: profile!.id,
-        shift_id: shiftId,
+        shift_id: shiftId ?? null,
         site_id: siteId,
         content,
         ai_enhanced: aiEnhanced ?? null,

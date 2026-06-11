@@ -86,9 +86,9 @@ export function GuardLogPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!activeShiftId || !selectedSite) return
+    if (!selectedSite) return
     await createLog.mutateAsync({
-      shiftId: activeShiftId,
+      shiftId: activeShiftId || null,
       siteId: selectedSite,
       content,
       aiEnhanced: aiEnhanced || undefined,
@@ -193,9 +193,9 @@ export function GuardLogPage() {
                   onClick={() => { setShowForm(false); setContent(''); setAiEnhanced('') }}>
                   Cancelar
                 </Button>
-                <Button type="submit" size="sm" disabled={createLog.isPending || !selectedSite || !activeShiftId}>
+                <Button type="submit" size="sm" disabled={createLog.isPending || !selectedSite}>
                   {createLog.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {!activeShiftId ? 'Sin turno activo' : 'Registrar novedad'}
+                  Registrar novedad
                 </Button>
               </div>
             </form>
